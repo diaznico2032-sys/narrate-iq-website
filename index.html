@@ -5,290 +5,553 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NarrateIQ — Automated Ad Performance Reports for Agencies</title>
   <meta name="description" content="NarrateIQ transforms Google Ads and Meta Ads data into clear, human-readable weekly reports — delivered to your clients automatically every Monday.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      background: #0f172a;
-      color: #f1f5f9;
-      line-height: 1.6;
+    :root {
+      --navy: #0a0f1e;
+      --navy-2: #0f172a;
+      --navy-3: #1e293b;
+      --navy-4: #334155;
+      --indigo: #6366f1;
+      --indigo-light: #818cf8;
+      --indigo-dim: rgba(99,102,241,0.12);
+      --indigo-border: rgba(99,102,241,0.25);
+      --white: #ffffff;
+      --slate-100: #f1f5f9;
+      --slate-300: #cbd5e1;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-600: #475569;
+      --green: #10b981;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --blue: #3b82f6;
     }
 
-    /* NAV */
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--navy);
+      color: var(--slate-100);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── GLOW ORBS ── */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+      top: -200px; left: -150px;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+      top: 100px; right: -200px;
+    }
+
+    /* ── NAV ── */
     nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 48px;
+      padding: 0 48px;
+      height: 64px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(10,15,30,0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
+
     .logo {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
       letter-spacing: -0.5px;
+      color: var(--white);
     }
-    .logo span { color: #818cf8; }
-    .nav-cta {
-      background: #6366f1;
-      color: #fff;
-      padding: 10px 24px;
-      border-radius: 8px;
+    .logo span { color: var(--indigo-light); }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--slate-400);
       text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-cta {
+      background: var(--indigo);
+      color: var(--white) !important;
+      padding: 8px 20px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 600;
-      transition: background 0.2s;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.1);
     }
-    .nav-cta:hover { background: #4f46e5; }
+    .nav-cta:hover {
+      background: #4f46e5;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+    }
 
-    /* HERO */
+    /* ── HERO ── */
+    .hero-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
     .hero {
+      position: relative;
+      z-index: 1;
       text-align: center;
-      padding: 100px 24px 80px;
-      max-width: 780px;
+      padding: 120px 24px 80px;
+      max-width: 860px;
       margin: 0 auto;
     }
+
     .hero-badge {
-      display: inline-block;
-      background: rgba(99,102,241,0.15);
-      border: 1px solid rgba(99,102,241,0.3);
-      color: #818cf8;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--indigo-dim);
+      border: 1px solid var(--indigo-border);
+      color: var(--indigo-light);
       font-size: 12px;
       font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 6px 16px;
+      letter-spacing: 0.5px;
+      padding: 6px 14px;
       border-radius: 100px;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
-    .hero h1 {
-      font-size: clamp(36px, 6vw, 64px);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -2px;
-      margin-bottom: 24px;
-      color: #f8fafc;
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--indigo-light);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
     }
-    .hero h1 em {
-      font-style: normal;
-      background: linear-gradient(135deg, #6366f1, #818cf8);
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    h1 {
+      font-size: clamp(40px, 6.5vw, 72px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -3px;
+      margin-bottom: 28px;
+      color: var(--white);
+    }
+    h1 .gradient {
+      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #818cf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .hero p {
-      font-size: 18px;
-      color: #94a3b8;
-      max-width: 560px;
-      margin: 0 auto 40px;
-      line-height: 1.75;
-    }
-    .hero-cta {
-      display: inline-block;
-      background: #6366f1;
-      color: #fff;
-      padding: 16px 36px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: 700;
-      transition: all 0.2s;
-      box-shadow: 0 8px 32px rgba(99,102,241,0.4);
-    }
-    .hero-cta:hover {
-      background: #4f46e5;
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(99,102,241,0.5);
-    }
+
     .hero-sub {
-      margin-top: 16px;
-      font-size: 13px;
-      color: #475569;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--slate-400);
+      max-width: 580px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
     }
 
-    /* EMAIL PREVIEW */
-    .preview-section {
-      padding: 0 24px 80px;
-      max-width: 680px;
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--indigo);
+      color: var(--white);
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 8px 32px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover {
+      background: #4f46e5;
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.1) inset, 0 16px 48px rgba(99,102,241,0.45);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.04);
+      color: var(--slate-300);
+      padding: 14px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+    .hero-note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--slate-600);
+    }
+
+    /* ── DIVIDER LINE ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent);
+      margin: 0 48px;
+    }
+
+    /* ── EMAIL PREVIEW ── */
+    .preview-wrap {
+      position: relative;
+      z-index: 1;
+      padding: 80px 24px;
+      max-width: 700px;
       margin: 0 auto;
     }
-    .preview-label {
+
+    .section-eyebrow {
       text-align: center;
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: #475569;
+      color: var(--slate-600);
       margin-bottom: 20px;
     }
-    .email-mockup {
-      background: #ffffff;
+
+    .mockup-shell {
+      background: var(--navy-3);
       border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
       border: 1px solid rgba(255,255,255,0.08);
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 40px 100px rgba(0,0,0,0.6),
+        0 0 80px rgba(99,102,241,0.08);
     }
-    .email-header {
-      background: #0f172a;
-      padding: 24px 28px;
+
+    /* browser chrome */
+    .browser-bar {
+      background: #1a2235;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .browser-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .browser-dot:nth-child(1) { background: #ff5f57; }
+    .browser-dot:nth-child(2) { background: #febc2e; }
+    .browser-dot:nth-child(3) { background: #28c840; }
+    .browser-url {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 11px;
+      color: var(--slate-500);
+      text-align: center;
+      margin: 0 12px;
+    }
+
+    /* email inside browser */
+    .email-outer {
+      background: #e8edf5;
+      padding: 20px;
+    }
+    .email-card-wrap {
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    .email-top {
+      background: #0a0f1e;
+      padding: 20px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 3px solid #6366f1;
+      border-bottom: 3px solid var(--indigo);
     }
-    .email-logo { font-size: 18px; font-weight: 800; color: #fff; }
-    .email-logo span { color: #818cf8; }
-    .email-meta { text-align: right; }
-    .email-client { font-size: 13px; font-weight: 700; color: #f1f5f9; }
-    .email-date { font-size: 11px; color: #64748b; margin-top: 2px; }
-    .email-body { padding: 20px; background: #eef2f7; }
-    .email-card {
-      background: #fff;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
-    .email-card-header {
-      padding: 8px 16px;
-      font-size: 10px;
+    .e-logo { font-size: 16px; font-weight: 800; color: #fff; font-family: 'Inter', sans-serif; }
+    .e-logo span { color: #818cf8; }
+    .e-meta-client { font-size: 12px; font-weight: 700; color: #f1f5f9; text-align: right; font-family: 'Inter', sans-serif; }
+    .e-meta-date { font-size: 10px; color: #475569; margin-top: 2px; font-family: 'Inter', sans-serif; }
+    .email-sections { background: #eef2f7; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .e-section { background: #fff; border-radius: 8px; overflow: hidden; }
+    .e-section-head {
+      padding: 6px 14px;
+      font-size: 9px;
       font-weight: 700;
       letter-spacing: 1.5px;
       text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
     }
-    .email-card-body {
-      padding: 12px 16px;
-      font-size: 13px;
+    .e-section-body {
+      padding: 10px 14px;
+      font-size: 12px;
       color: #374151;
       line-height: 1.6;
+      font-family: 'Inter', sans-serif;
     }
-    .green .email-card-header { background: #d1fae5; color: #059669; }
-    .red .email-card-header { background: #fecaca; color: #dc2626; }
-    .purple .email-card-header { background: #ede9fe; color: #7c3aed; }
-    .blue .email-card-header { background: #dbeafe; color: #0369a1; }
-    .gray .email-card-header { background: #e5e7eb; color: #1f2937; }
+    .e-green .e-section-head { background: #d1fae5; color: #059669; }
+    .e-red .e-section-head { background: #fee2e2; color: #dc2626; }
+    .e-purple .e-section-head { background: #ede9fe; color: #7c3aed; }
+    .e-blue .e-section-head { background: #dbeafe; color: #2563eb; }
+    .e-gray .e-section-head { background: #f3f4f6; color: #374151; }
 
-    /* HOW IT WORKS */
-    .section {
+    /* ── FEATURES ── */
+    .features-wrap {
+      position: relative;
+      z-index: 1;
       padding: 80px 24px;
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
     }
-    .section-label {
-      text-align: center;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #6366f1;
-      margin-bottom: 16px;
-    }
-    .section h2 {
-      text-align: center;
-      font-size: clamp(28px, 4vw, 42px);
+
+    .features-wrap h2 {
+      font-size: clamp(28px, 4vw, 44px);
       font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 56px;
-      color: #f8fafc;
+      letter-spacing: -1.5px;
+      text-align: center;
+      margin-bottom: 60px;
+      color: var(--white);
     }
-    .steps {
+
+    .steps-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
     }
-    .step {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 28px;
-      transition: border-color 0.2s;
+
+    .step-card {
+      background: linear-gradient(160deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.8) 100%);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
     }
-    .step:hover { border-color: #6366f1; }
-    .step-number {
-      width: 36px;
-      height: 36px;
-      background: rgba(99,102,241,0.15);
-      border: 1px solid rgba(99,102,241,0.3);
+    .step-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--indigo-dim), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .step-card:hover {
+      border-color: var(--indigo-border);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(99,102,241,0.08);
+    }
+    .step-card:hover::before { opacity: 1; }
+
+    .step-num {
+      width: 32px; height: 32px;
+      background: var(--indigo-dim);
+      border: 1px solid var(--indigo-border);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      font-weight: 800;
-      color: #818cf8;
-      margin-bottom: 16px;
-    }
-    .step h3 {
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 700;
-      color: #f1f5f9;
-      margin-bottom: 8px;
+      color: var(--indigo-light);
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
     }
-    .step p { font-size: 14px; color: #64748b; line-height: 1.65; }
+    .step-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-card p {
+      font-size: 13px;
+      color: var(--slate-500);
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
 
-    /* WHY */
+    /* ── WHY SECTION ── */
+    .why-wrap {
+      position: relative;
+      z-index: 1;
+      padding: 40px 24px 80px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .why-wrap h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      text-align: center;
+      margin-bottom: 60px;
+      color: var(--white);
+    }
     .why-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
+      gap: 12px;
     }
-    .why-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
+    .why-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
       padding: 24px;
-    }
-    .why-icon { font-size: 24px; margin-bottom: 12px; }
-    .why-card h3 { font-size: 15px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
-    .why-card p { font-size: 13px; color: #64748b; line-height: 1.6; }
-
-    /* CTA */
-    .cta-section {
-      text-align: center;
-      padding: 80px 24px 100px;
-      border-top: 1px solid #1e293b;
-    }
-    .cta-section h2 {
-      font-size: clamp(28px, 4vw, 42px);
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 16px;
-      color: #f8fafc;
-    }
-    .cta-section p {
-      font-size: 16px;
-      color: #64748b;
-      margin-bottom: 36px;
-    }
-    .cta-email {
-      display: inline-block;
-      background: #6366f1;
-      color: #fff;
-      padding: 16px 36px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: 700;
-      box-shadow: 0 8px 32px rgba(99,102,241,0.4);
       transition: all 0.2s;
     }
-    .cta-email:hover {
-      background: #4f46e5;
-      transform: translateY(-2px);
+    .why-item:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.1);
     }
-
-    /* FOOTER */
-    footer {
-      text-align: center;
-      padding: 24px;
-      border-top: 1px solid #1e293b;
+    .why-icon {
+      font-size: 22px;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .why-item h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+    .why-item p {
       font-size: 13px;
-      color: #334155;
+      color: var(--slate-500);
+      line-height: 1.65;
     }
-    footer a { color: #475569; text-decoration: none; }
 
-    @media (max-width: 600px) {
-      nav { padding: 20px 24px; }
-      .hero { padding: 60px 24px 60px; }
+    /* ── CTA SECTION ── */
+    .cta-wrap {
+      position: relative;
+      z-index: 1;
+      padding: 80px 24px 120px;
+    }
+    .cta-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      background: linear-gradient(160deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 100%);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 24px;
+      padding: 64px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-inner::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-inner h2 {
+      font-size: clamp(26px, 4vw, 38px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+      color: var(--white);
+      position: relative;
+      z-index: 1;
+    }
+    .cta-inner p {
+      font-size: 16px;
+      color: var(--slate-400);
+      margin-bottom: 36px;
+      position: relative;
+      z-index: 1;
+    }
+    .cta-inner .btn-primary { position: relative; z-index: 1; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 28px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    footer .f-logo { font-size: 15px; font-weight: 800; color: var(--white); }
+    footer .f-logo span { color: var(--indigo-light); }
+    footer p { font-size: 12px; color: var(--slate-600); }
+    footer a { color: var(--slate-500); text-decoration: none; }
+    footer a:hover { color: var(--slate-300); }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 80px 20px 60px; }
+      .cta-inner { padding: 40px 24px; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
     }
   </style>
 </head>
@@ -297,124 +560,156 @@
   <!-- NAV -->
   <nav>
     <div class="logo">Narrate<span>IQ</span></div>
-    <a href="mailto:narrateiqhq@gmail.com" class="nav-cta">Get Early Access</a>
+    <ul class="nav-links">
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#why">Why NarrateIQ</a></li>
+      <li><a href="mailto:narrateiqhq@gmail.com" class="nav-cta">Get Early Access →</a></li>
+    </ul>
   </nav>
 
   <!-- HERO -->
-  <section class="hero">
-    <div class="hero-badge">Built for Marketing Agencies</div>
-    <h1>Your clients deserve reports that <em>actually make sense.</em></h1>
-    <p>NarrateIQ pulls your Google Ads and Meta Ads data and turns it into a clear, human-readable performance report — delivered to every client automatically, every Monday morning.</p>
-    <a href="mailto:narrateiqhq@gmail.com" class="hero-cta">Request Early Access</a>
-    <div class="hero-sub">No dashboards. No exports. Just a report that reads like a human wrote it.</div>
-  </section>
+  <div class="hero-wrap">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-  <!-- EMAIL PREVIEW -->
-  <div class="preview-section">
-    <div class="preview-label">What your clients receive every Monday</div>
-    <div class="email-mockup">
-      <div class="email-header">
-        <div class="email-logo">Narrate<span>IQ</span></div>
-        <div class="email-meta">
-          <div class="email-client">Sunrise Dental Group</div>
-          <div class="email-date">Monday, June 2, 2026</div>
-        </div>
+    <section class="hero">
+      <div class="hero-badge">
+        <div class="hero-badge-dot"></div>
+        Now in early access
       </div>
-      <div class="email-body">
-        <div class="email-card gray">
-          <div class="email-card-header">&#9670; The Week in One Sentence</div>
-          <div class="email-card-body">Google brand search is carrying the account while the Competitor Conquest campaign quietly drains budget at 3x your target cost per booking.</div>
+      <h1>Client reporting that<br><span class="gradient">writes itself.</span></h1>
+      <p class="hero-sub">NarrateIQ pulls your Google Ads and Meta Ads data and turns it into a clear, human-readable performance report — delivered to every client automatically, every Monday morning.</p>
+      <div class="hero-actions">
+        <a href="mailto:narrateiqhq@gmail.com" class="btn-primary">Get Early Access →</a>
+        <a href="#how-it-works" class="btn-secondary">See how it works</a>
+      </div>
+      <p class="hero-note">No dashboards. No exports. No manual work.</p>
+    </section>
+
+    <!-- EMAIL PREVIEW -->
+    <div class="preview-wrap">
+      <div class="section-eyebrow">What your clients receive every Monday</div>
+      <div class="mockup-shell">
+        <div class="browser-bar">
+          <div class="browser-dot"></div>
+          <div class="browser-dot"></div>
+          <div class="browser-dot"></div>
+          <div class="browser-url">📧 &nbsp; Sunrise Dental Group — Weekly Ad Performance Report</div>
         </div>
-        <div class="email-card green">
-          <div class="email-card-header">&#10003; What Worked</div>
-          <div class="email-card-body"><strong>Brand Search – Exact</strong> delivered 18 appointment inquiries at <strong>$23.33 each</strong> — 48% below your $45 target. This campaign is your most efficient dollar right now.</div>
-        </div>
-        <div class="email-card red">
-          <div class="email-card-header">! What Needs Attention</div>
-          <div class="email-card-body"><strong>Competitor Conquest</strong> spent $890 and generated only 6 conversions at <strong>$148 per booking</strong> — more than 3x your target. We're pausing it this week and reallocating budget to Brand Search.</div>
-        </div>
-        <div class="email-card purple">
-          <div class="email-card-header">&#9670; The Number That Matters Most</div>
-          <div class="email-card-body">Your blended CPA rose to <strong>$48.49</strong>, up from $40.24 last week. You're 8% above your $45 target — driven entirely by Competitor Conquest. Pausing that campaign should bring you back under target next week.</div>
-        </div>
-        <div class="email-card blue">
-          <div class="email-card-header">&#8594; Next Week's Focus</div>
-          <div class="email-card-body">
-            &bull; Pause Competitor Conquest and shift $500 to Brand Search<br>
-            &bull; Test a new Meta retargeting audience for website visitors past 30 days<br>
-            &bull; Monitor blended CPA daily to confirm it returns below $45
+        <div class="email-outer">
+          <div class="email-card-wrap">
+            <div class="email-top">
+              <div class="e-logo">Narrate<span>IQ</span></div>
+              <div>
+                <div class="e-meta-client">Sunrise Dental Group</div>
+                <div class="e-meta-date">Monday, June 2, 2026</div>
+              </div>
+            </div>
+            <div class="email-sections">
+              <div class="e-section e-gray">
+                <div class="e-section-head">◆ The Week in One Sentence</div>
+                <div class="e-section-body">Brand Search is carrying the account while Competitor Conquest quietly drains budget at 3× your target cost per booking.</div>
+              </div>
+              <div class="e-section e-green">
+                <div class="e-section-head">✓ What Worked</div>
+                <div class="e-section-body"><strong>Brand Search – Exact</strong> delivered 18 appointment inquiries at <strong>$23.33 each</strong> — 48% below your $45 target.</div>
+              </div>
+              <div class="e-section e-red">
+                <div class="e-section-head">! What Needs Attention</div>
+                <div class="e-section-body"><strong>Competitor Conquest</strong> spent $890 and generated only 6 conversions at <strong>$148 per booking</strong>. We're pausing it this week.</div>
+              </div>
+              <div class="e-section e-purple">
+                <div class="e-section-head">◆ The Number That Matters Most</div>
+                <div class="e-section-body">Blended CPA rose to <strong>$48.49</strong>, up from $40.24 — driven entirely by Competitor Conquest. Pausing it should bring you back under $45 next week.</div>
+              </div>
+              <div class="e-section e-blue">
+                <div class="e-section-head">→ Next Week's Focus</div>
+                <div class="e-section-body">
+                  · Pause Competitor Conquest, shift $500 to Brand Search<br>
+                  · Test Meta retargeting for 30-day website visitors<br>
+                  · Monitor blended CPA daily
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="divider"></div>
+
   <!-- HOW IT WORKS -->
-  <section class="section">
-    <div class="section-label">How It Works</div>
-    <h2>Set it up once. Reports run forever.</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-number">1</div>
+  <section class="features-wrap" id="how-it-works">
+    <div class="section-eyebrow" style="text-align:center;margin-bottom:16px;">How It Works</div>
+    <h2>Set it up once.<br>Reports run forever.</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
         <h3>Connect Your Accounts</h3>
-        <p>Link your client's Google Ads and Meta Ads accounts. Takes under 15 minutes per client.</p>
+        <p>Link your client's Google Ads and Meta Ads accounts. Takes under 15 minutes per client with a simple config file.</p>
       </div>
-      <div class="step">
-        <div class="step-number">2</div>
+      <div class="step-card">
+        <div class="step-num">02</div>
         <h3>We Pull the Data</h3>
         <p>Every Monday, NarrateIQ automatically fetches campaign-level performance data for the past 7 days.</p>
       </div>
-      <div class="step">
-        <div class="step-number">3</div>
+      <div class="step-card">
+        <div class="step-num">03</div>
         <h3>AI Writes the Report</h3>
-        <p>Our engine analyzes the data, flags anomalies, and writes a clear narrative tailored to your client's specific goals.</p>
+        <p>Our engine analyzes the numbers, flags anomalies against your client's specific goals, and writes a clear narrative.</p>
       </div>
-      <div class="step">
-        <div class="step-number">4</div>
+      <div class="step-card">
+        <div class="step-num">04</div>
         <h3>Client Gets the Email</h3>
-        <p>A professional, branded report lands in your client's inbox — no action required from you.</p>
+        <p>A professional, branded report lands in your client's inbox — automatically, every week, without you touching anything.</p>
       </div>
     </div>
   </section>
 
+  <div class="divider"></div>
+
   <!-- WHY -->
-  <section class="section" style="padding-top:0;">
-    <div class="section-label">Why NarrateIQ</div>
-    <h2>Reporting that builds trust.</h2>
+  <section class="why-wrap" id="why">
+    <div class="section-eyebrow" style="text-align:center;margin-bottom:16px;">Why NarrateIQ</div>
+    <h2>Reporting that actually<br>builds client trust.</h2>
     <div class="why-grid">
-      <div class="why-card">
-        <div class="why-icon">&#128203;</div>
+      <div class="why-item">
+        <span class="why-icon">✦</span>
         <h3>Plain English</h3>
-        <p>No jargon. No dashboards. Reports your clients actually read and understand.</p>
+        <p>No jargon. No dashboards. Reports your clients actually read and understand in under 3 minutes.</p>
       </div>
-      <div class="why-card">
-        <div class="why-icon">&#9200;</div>
+      <div class="why-item">
+        <span class="why-icon">⚡</span>
         <h3>Fully Automated</h3>
-        <p>Set up once and it runs every week without you lifting a finger.</p>
+        <p>Configure once and it runs every week without you lifting a finger. Real automation, not a reminder.</p>
       </div>
-      <div class="why-card">
-        <div class="why-icon">&#127919;</div>
+      <div class="why-item">
+        <span class="why-icon">◎</span>
         <h3>Goal-Aware</h3>
-        <p>Every report is written around your client's specific goal and target CPA — not generic metrics.</p>
+        <p>Every report is written around your client's specific goal and target CPA — not generic platform metrics.</p>
       </div>
-      <div class="why-card">
-        <div class="why-icon">&#9889;</div>
+      <div class="why-item">
+        <span class="why-icon">→</span>
         <h3>15-Min Onboarding</h3>
-        <p>Add a new client with a single config file. No dev work. No lengthy setup.</p>
+        <p>Add a new client with a single config file. No dev work, no lengthy setup, no agency ops headache.</p>
       </div>
     </div>
   </section>
 
   <!-- CTA -->
-  <section class="cta-section">
-    <h2>Ready to automate your client reporting?</h2>
-    <p>NarrateIQ is in early access. Get in touch to be one of the first agencies onboarded.</p>
-    <a href="mailto:narrateiqhq@gmail.com" class="cta-email">narrateiqhq@gmail.com</a>
+  <section class="cta-wrap">
+    <div class="cta-inner">
+      <h2>Ready to stop writing reports manually?</h2>
+      <p>NarrateIQ is in early access. Get in touch to be one of the first agencies onboarded.</p>
+      <a href="mailto:narrateiqhq@gmail.com" class="btn-primary">Contact Us → narrateiqhq@gmail.com</a>
+    </div>
   </section>
 
   <!-- FOOTER -->
   <footer>
-    <p>&copy; 2026 NarrateIQ &nbsp;·&nbsp; <a href="mailto:narrateiqhq@gmail.com">narrateiqhq@gmail.com</a> &nbsp;·&nbsp; narrate-iq.com</p>
+    <div class="f-logo">Narrate<span>IQ</span></div>
+    <p>&copy; 2026 NarrateIQ &nbsp;·&nbsp; <a href="mailto:narrateiqhq@gmail.com">narrateiqhq@gmail.com</a> &nbsp;·&nbsp; <a href="https://narrate-iq.com">narrate-iq.com</a></p>
   </footer>
 
 </body>
